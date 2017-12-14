@@ -1,5 +1,5 @@
 # WarframeDropTableHelper
-一个将WARFRAME掉率数据转化为json的简单Java程序.程序生成的json文件主要为WARFRAME灰机wiki上的一些页面提供数据支持。
+一个将WARFRAME掉率数据转化为json的简单Java程序。程序生成的json文件主要为WARFRAME灰机wiki上的一些页面提供数据支持。
 
 ## 相关说明
 * 该程序使用了“Genson”和“Apache POI”这两个库。
