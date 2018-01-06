@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import javafx.scene.effect.*?>
+<?import java.lang.*?>
+<?import java.util.*?>
+<?import javafx.scene.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+
+<AnchorPane id="AnchorPane" prefHeight="146.0" prefWidth="293.0" xmlns="http://javafx.com/javafx/8" xmlns:fx="http://javafx.com/fxml/1" fx:controller="MainSceneController">
+   <children>
+      <ProgressBar fx:id="workProgressBar" focusTraversable="false" layoutX="14.0" layoutY="9.0" prefHeight="23.0" prefWidth="212.0" progress="0.0" />
+      <Button fx:id="startButton" defaultButton="true" layoutX="238.0" layoutY="9.0" mnemonicParsing="false" onMouseClicked="#startButtonClicked" prefHeight="18.0" prefWidth="40.0" text="开始" />
+      <TextArea fx:id="outputViewTA" editable="false" focusTraversable="false" layoutX="15.0" layoutY="39.0" prefHeight="94.0" prefWidth="263.0" />
+   </children>
+</AnchorPane>
