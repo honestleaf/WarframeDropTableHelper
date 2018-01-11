@@ -127,8 +127,8 @@ public class ItemDropWriter extends GenericDropWriter<HashMap<String, ArrayList<
                 cRow.createCell(cell++).setCellValue(key);
                 for (Object[] v : drops.get(key)) {
                     cRow.createCell(cell++).setCellValue((String) v[0]);
-                    cRow.createCell(cell++).setCellValue((float) v[1]);
-                    cRow.createCell(cell++).setCellValue((float) v[2]);
+                    cRow.createCell(cell++).setCellValue(Float.toString((float) v[1]));
+                    cRow.createCell(cell++).setCellValue(Float.toString((float) v[2]));
                 }
             }
             nwb.write(fos);
