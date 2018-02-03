@@ -38,7 +38,7 @@ public class StringParser {
     private final Pattern rotationPattern = Pattern.compile("Rotation (A|B|C)");
     private final Pattern chancePattern = Pattern.compile("([0-9\\.]+)%");
     private final Pattern bountyTierPattern = Pattern.compile("Level .+? Bounty");
-    private final Pattern bountyStagePattern = Pattern.compile("Stage .*");
+    private final Pattern bountyStagePattern = Pattern.compile("(Final |)Stage.*");
 
     /**
      *
