@@ -94,6 +94,14 @@ public class TransientParser extends GenericParser<HtmlTable, ArrayList<String[]
                             planet = "Earth";
                             mtype = "Assassination";
                             break;
+                        case "Void Onslaught (Easy)":
+                            planet = "Sanctuary (Cephalon Simaris)";
+                            mtype = "Void Onslaught";
+                            break;
+                        case "Void Onslaught (Hard)":
+                            planet = "Sanctuary (Cephalon Simaris)";
+                            mtype = "Void Onslaught";
+                            break;
                         case "Mutalist Alad V Assassinate":
                             if (hasMAVA) {
                                 skip = true;
