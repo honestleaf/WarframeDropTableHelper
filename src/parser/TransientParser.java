@@ -27,6 +27,7 @@ import com.gargoylesoftware.htmlunit.html.HtmlTable;
 import com.gargoylesoftware.htmlunit.html.HtmlTableCell;
 import com.gargoylesoftware.htmlunit.html.HtmlTableRow;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 /**
  *
@@ -34,12 +35,24 @@ import java.util.ArrayList;
  */
 public class TransientParser extends GenericParser<HtmlTable, ArrayList<String[]>> {
 
+    private HashMap<String, String[]> missionMap = null;
+
+    public void setMissionMap(ArrayList<String[]> list) {
+        missionMap = new HashMap<>();
+        for (String[] sa : list) {
+            if (sa[0] != null) {
+                missionMap.put(sa[0], new String[]{sa[1], sa[2], sa[3], sa[4], sa[5]});
+            }
+        }
+    }
+
     @Override
     public ArrayList<String[]> parse() {
         ArrayList<String[]> list = new ArrayList<>();
         StringParser sp = new StringParser();
         String rotation = null, temp, chance, buffer, node = null, reward = null, planet = "Any", mtype = "Any";
-        boolean skip = false, hasMAVA = false;
+        boolean skip = false;
+        ArrayList<String> singleList = new ArrayList<>();
         for (final HtmlTableRow row : this.table.getRows()) {
             if (skip) {
                 if (row.getAttribute("class").contains("blank-row")) {
@@ -48,7 +61,6 @@ public class TransientParser extends GenericParser<HtmlTable, ArrayList<String[]
                     continue;
                 }
             }
-            INNER:
             for (final HtmlTableCell cell : row.getCells()) {
                 buffer = cell.asText();
                 if (cell.getColumnSpan() == 2) {
@@ -58,70 +70,27 @@ public class TransientParser extends GenericParser<HtmlTable, ArrayList<String[]
                     } else {
                         node = buffer;
                         rotation = "All";
-                    }                   
-                    switch (buffer) {
-                        case "Derelict Vault":
-                            planet = "Derelict";
-                            break;
-                        case "Phorid Assassination":
-                            mtype = "Assassination";
-                            break;
-                        case "Fomorian Sabotage":
-                            mtype = "Sabotage";
-                            break;
-                        case "Plains of Eidolon Incursions":
-                            planet = "Earth";
-                            node = "Plains of Eidolon";
-                            mtype = "Incursion";
-                            break;
-                        case "The Law Of Retribution":
-                            planet = "Earth";
-                            mtype = "Trial";
-                            break;
-                        case "The Law Of Retribution (Nightmare)":
-                            planet = "Earth";
-                            mtype = "Trial";
-                            break;
-                        case "The Jordas Verdict":
-                            planet = "Eris";
-                            mtype = "Trial";
-                            break;
-                        case "Jordas Golem Assassinate":
-                            planet = "Eris";
-                            mtype = "Assassination";
-                            break;
-                        case "Vay Hek Frequency Triangulator":
-                            planet = "Earth";
-                            mtype = "Assassination";
-                            break;
-                        case "Void Onslaught (Easy)":
-                            planet = "Sanctuary (Cephalon Simaris)";
-                            mtype = "Void Onslaught";
-                            break;
-                        case "Void Onslaught (Hard)":
-                            planet = "Sanctuary (Cephalon Simaris)";
-                            mtype = "Void Onslaught";
-                            break;
-                        case "Mutalist Alad V Assassinate":
-                            if (hasMAVA) {
+                    }
+                    planet = "Any";
+                    mtype = "Any";
+                    if (missionMap != null) {
+                        if (missionMap.containsKey(buffer)) {
+                            if (missionMap.get(buffer)[3] != null) {
+                                if (singleList.contains(buffer)) {
+                                    skip = true;
+                                    break;
+                                } else {
+                                    singleList.add(buffer);
+                                }
+                            }
+                            if (missionMap.get(buffer)[4] != null) {
                                 skip = true;
-                                break INNER;
-                            } else {
-                                planet = "Eris";
-                                mtype = "Assassination";
-                                hasMAVA = true;
                                 break;
                             }
-                        case "Orokin Derelict Defense":
-                        case "Orokin Derelict Assassinate":
-                        case "Orokin Derelict Survival":
-                        case "Help Clem Retrieve The Relic":
-                            skip = true;
-                            break INNER;
-                        default:
-                            planet = "Any";
-                            mtype = "Any";
-                            break;
+                            planet = missionMap.get(buffer)[0] != null ? missionMap.get(buffer)[0] : planet;
+                            mtype = missionMap.get(buffer)[1] != null ? missionMap.get(buffer)[1] : mtype;
+                            node = missionMap.get(buffer)[2] != null ? missionMap.get(buffer)[2] : node;
+                        }
                     }
                 } else if (cell.getColumnSpan() == 1) {
                     if (cell.getIndex() == 0) {

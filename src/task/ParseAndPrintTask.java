@@ -42,6 +42,7 @@ import parser.BountyParser;
 import parser.MissionParser;
 import parser.EnemyParser;
 import parser.ModByModParser;
+import parser.SpecialMissionMapParser;
 import parser.TransientParser;
 import tablewriter.ItemDropWriter;
 import tablewriter.MissionDropWriter;
@@ -53,7 +54,7 @@ import tablewriter.MissionDropWriter;
 public class ParseAndPrintTask extends Task<Integer> {
 
     private final static int PROGRESS_MAX = 100;
-    private final static Logger log = Logger.getLogger(ParseAndPrintTask.class.getName());
+    private final static Logger LOG = Logger.getLogger(ParseAndPrintTask.class.getName());
     private final static String DATA_URL = "https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html";
     private final static String MR_ID = "missionRewards";
     private final static String BOUNTY_ID = "cetusRewards";
@@ -64,7 +65,7 @@ public class ParseAndPrintTask extends Task<Integer> {
     private final static String KR_ID = "keyRewards";
     private final static String MI_ID = "miscItems";
     private final static String EBT_ID = "enemyBlueprintTables";
-    private final static String ADDITIONAL_DROP_FILE = "AdditionalDrop.xlsx";
+    private final static String ADDITIONAL_DATA_FILE = "AdditionalData.xlsx";
 
     private final static String MISSION_DROP_JSON = "MissionDrop.json";
     private final static String MISSION_DROP_XLSX = "MissionDrop.xlsx";
@@ -78,21 +79,22 @@ public class ParseAndPrintTask extends Task<Integer> {
     @Override
     protected Integer call() throws Exception {
 
-        log.info("Start processing.");
+        LOG.info("Start processing.");
         updateProgress(1, PROGRESS_MAX);
 
         try (final WebClient webClient = new WebClient()) {
-            log.info("Retrieve web page.");
+            LOG.info("Retrieve web page.");
             final HtmlPage page = webClient.getPage(DATA_URL);
             updateProgress(40, PROGRESS_MAX);
 
             HtmlTable table;
-            ArrayList<String[]> missionDrop;
+            ArrayList<String[]> missionDrop, missionMap;
             HashMap<String, ArrayList<Object[]>> modLocation, enemyDropTables;
 
             MissionParser mp = new MissionParser();
             BountyParser bp = new BountyParser();
             TransientParser tp = new TransientParser();
+            SpecialMissionMapParser smmp = new SpecialMissionMapParser();
             AdditionalMissionDropParser adp = new AdditionalMissionDropParser();
             ModByModParser mbmp = new ModByModParser();
             EnemyParser ep = new EnemyParser();
@@ -100,39 +102,49 @@ public class ParseAndPrintTask extends Task<Integer> {
             MissionDropWriter mdw = new MissionDropWriter();
             ItemDropWriter idw = new ItemDropWriter();
 
-            log.info("Parse \"Missions\" table.");
+            LOG.info("Parse \"Missions\" table.");
             table = page.querySelector("#" + MR_ID + "+table");
             mp.setTable(table);
             missionDrop = mp.parse();
             updateProgress(50, PROGRESS_MAX);
 
-            log.info("Parse \"Cetus Bounty Rewards\" table.");
+            LOG.info("Parse \"Cetus Bounty Rewards\" table.");
             table = page.querySelector("#" + BOUNTY_ID + "+table");
             bp.setTable(table);
             missionDrop.addAll(bp.parse());
             updateProgress(55, PROGRESS_MAX);
+            
+            missionMap = null;
+            try (XSSFWorkbook wb = new XSSFWorkbook(new File(ADDITIONAL_DATA_FILE));) {
+                XSSFSheet missionSheet = wb.getSheet("mission map");
+                smmp.setTable(missionSheet);
+                missionMap = smmp.parse();
+            } catch (IOException | InvalidFormatException ex) {
+                Logger.getLogger(ParseAndPrintTask.class.getName()).error(null, ex);
+            }
 
-            log.info("Parse \"Sorties\" table.");
+            LOG.info("Parse \"Sorties\" table.");
             table = page.querySelector("#" + SR_ID + "+table");
             tp.setTable(table);
+            tp.setMissionMap(missionMap);
             missionDrop.addAll(tp.parse());
             updateProgress(57.5, PROGRESS_MAX);
 
-            log.info("Parse \"Dynamic Location Rewards\" table.");
+            LOG.info("Parse \"Dynamic Location Rewards\" table.");
             table = page.querySelector("#" + TR_ID + "+table");
             tp.setTable(table);
             missionDrop.addAll(tp.parse());
             updateProgress(60, PROGRESS_MAX);
 
-            log.info("Parse \"Keys\" table.");
+            LOG.info("Parse \"Keys\" table.");
             table = page.querySelector("#" + KR_ID + "+table");
             tp.setTable(table);
             missionDrop.addAll(tp.parse());
             updateProgress(62.5, PROGRESS_MAX);
 
-            log.info("Parse \"AdditionalDrop\" table.");
-            try (XSSFWorkbook wb = new XSSFWorkbook(new File(ADDITIONAL_DROP_FILE));) {
-                XSSFSheet missionSheet = wb.getSheet("mission");
+            LOG.info("Parse \"AdditionalDrop\" table.");
+            try (XSSFWorkbook wb = new XSSFWorkbook(new File(ADDITIONAL_DATA_FILE));) {
+                XSSFSheet missionSheet = wb.getSheet("additional drops");
                 adp.setTable(missionSheet);
                 missionDrop.addAll(adp.parse());
             } catch (IOException | InvalidFormatException ex) {
@@ -140,20 +152,20 @@ public class ParseAndPrintTask extends Task<Integer> {
             }
             updateProgress(65, PROGRESS_MAX);
 
-            log.info("Generate \"MissionDrop\" files.");
+            LOG.info("Generate \"MissionDrop\" files.");
             mdw.setJsonFile(MISSION_DROP_JSON);
             mdw.setXlsxFile(MISSION_DROP_XLSX);
             mdw.writeJsonFile(missionDrop);
             mdw.writeXlsxFile(missionDrop);
             updateProgress(70, PROGRESS_MAX);
 
-            log.info("Parse \"Mod Drops by Mod\" table.");
+            LOG.info("Parse \"Mod Drops by Mod\" table.");
             table = page.querySelector("#" + ML_ID + "+table");
             mbmp.setTable(table);
             modLocation = mbmp.parse();
             updateProgress(75, PROGRESS_MAX);
 
-            log.info("Generate \"ModDropByMod\" files.");
+            LOG.info("Generate \"ModDropByMod\" files.");
             idw.setListSizeMax(mbmp.getListSizeMax());
             idw.setBoundaryKey(mbmp.getBoundaryKey());
             idw.setJsonFile(MOD_BY_MOD_JSON);
@@ -162,25 +174,25 @@ public class ParseAndPrintTask extends Task<Integer> {
             idw.writeXlsxFile(modLocation);
             updateProgress(80, PROGRESS_MAX);
 
-            log.info("Parse \"Mod Drops by Enemy\" table.");
+            LOG.info("Parse \"Mod Drops by Enemy\" table.");
             table = page.querySelector("#" + EMT_ID + "+table");
             ep.setTable(table);
             ep.parse();
             updateProgress(85, PROGRESS_MAX);
-            
-            log.info("Parse \"Blueprint Drops by Enemy\" table.");
+
+            LOG.info("Parse \"Blueprint Drops by Enemy\" table.");
             table = page.querySelector("#" + EBT_ID + "+table");
             ep.setTable(table);
             ep.parse();
             updateProgress(90, PROGRESS_MAX);
-            
-            log.info("Parse \"Miscellanous Enemy Drops\" table.");
+
+            LOG.info("Parse \"Miscellanous Enemy Drops\" table.");
             table = page.querySelector("#" + MI_ID + "+table");
             ep.setTable(table);
             enemyDropTables = ep.parse();
             updateProgress(95, PROGRESS_MAX);
 
-            log.info("Generate \"EnemyDrop\" files.");
+            LOG.info("Generate \"EnemyDrop\" files.");
             idw.setListSizeMax(ep.getListSizeMax());
             idw.setBoundaryKey(ep.getBoundaryKey());
             idw.setKeyTitle("enemyName");
@@ -194,7 +206,7 @@ public class ParseAndPrintTask extends Task<Integer> {
             idw.writeXlsxFile(enemyDropTables);
             updateProgress(100, PROGRESS_MAX);
 
-            log.info("Done.");
+            LOG.info("Done.");
         } catch (IOException | FailingHttpStatusCodeException ex) {
             Logger.getLogger(ParseAndPrintTask.class.getName()).error(null, ex);
         }
