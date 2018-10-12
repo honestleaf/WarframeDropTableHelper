@@ -88,8 +88,8 @@ public class ParseAndPrintTask extends Task<Integer> {
             updateProgress(40, PROGRESS_MAX);
 
             HtmlTable table;
-            ArrayList<String[]> missionDrop, missionMap;
-            HashMap<String, ArrayList<Object[]>> modLocation, enemyDropTables;
+            ArrayList<String[]> missionDrop = new ArrayList<>(), missionMap;
+            HashMap<String, ArrayList<Object[]>> modLocation = null, enemyDropTables = null;
 
             MissionParser mp = new MissionParser();
             BountyParser bp = new BountyParser();
@@ -104,16 +104,24 @@ public class ParseAndPrintTask extends Task<Integer> {
 
             LOG.info("Parse \"Missions\" table.");
             table = page.querySelector("#" + MR_ID + "+table");
-            mp.setTable(table);
-            missionDrop = mp.parse();
+            if (table != null) {
+                mp.setTable(table);
+                missionDrop = mp.parse();
+            } else {
+               LOG.warn("\"Missions\" table is not found.");
+            }
             updateProgress(50, PROGRESS_MAX);
 
             LOG.info("Parse \"Cetus Bounty Rewards\" table.");
             table = page.querySelector("#" + BOUNTY_ID + "+table");
-            bp.setTable(table);
-            missionDrop.addAll(bp.parse());
+            if (table != null) {
+                bp.setTable(table);
+                missionDrop.addAll(bp.parse());
+            } else {
+               LOG.warn("\"Cetus Bounty Rewards\" table is not found.");
+            }
             updateProgress(55, PROGRESS_MAX);
-            
+
             missionMap = null;
             try (XSSFWorkbook wb = new XSSFWorkbook(new File(ADDITIONAL_DATA_FILE));) {
                 XSSFSheet missionSheet = wb.getSheet("mission map");
@@ -125,21 +133,33 @@ public class ParseAndPrintTask extends Task<Integer> {
 
             LOG.info("Parse \"Sorties\" table.");
             table = page.querySelector("#" + SR_ID + "+table");
-            tp.setTable(table);
-            tp.setMissionMap(missionMap);
-            missionDrop.addAll(tp.parse());
+            if (table != null) {
+                tp.setTable(table);
+                tp.setMissionMap(missionMap);
+                missionDrop.addAll(tp.parse());
+            } else {
+               LOG.warn("\"Sorties\" table is not found.");
+            }
             updateProgress(57.5, PROGRESS_MAX);
 
             LOG.info("Parse \"Dynamic Location Rewards\" table.");
             table = page.querySelector("#" + TR_ID + "+table");
-            tp.setTable(table);
-            missionDrop.addAll(tp.parse());
+            if (table != null) {
+                tp.setTable(table);
+                missionDrop.addAll(tp.parse());
+            } else {
+               LOG.warn("\"Dynamic Location Rewards\" table is not found.");
+            }
             updateProgress(60, PROGRESS_MAX);
 
             LOG.info("Parse \"Keys\" table.");
             table = page.querySelector("#" + KR_ID + "+table");
-            tp.setTable(table);
-            missionDrop.addAll(tp.parse());
+            if (table != null) {
+                tp.setTable(table);
+                missionDrop.addAll(tp.parse());
+            } else {
+               LOG.warn("\"Keys\" table is not found.");
+            }
             updateProgress(62.5, PROGRESS_MAX);
 
             LOG.info("Parse \"AdditionalDrop\" table.");
@@ -155,14 +175,20 @@ public class ParseAndPrintTask extends Task<Integer> {
             LOG.info("Generate \"MissionDrop\" files.");
             mdw.setJsonFile(MISSION_DROP_JSON);
             mdw.setXlsxFile(MISSION_DROP_XLSX);
-            mdw.writeJsonFile(missionDrop);
-            mdw.writeXlsxFile(missionDrop);
+            if (!missionDrop.isEmpty()) {
+                mdw.writeJsonFile(missionDrop);
+                mdw.writeXlsxFile(missionDrop);
+            }
             updateProgress(70, PROGRESS_MAX);
 
             LOG.info("Parse \"Mod Drops by Mod\" table.");
             table = page.querySelector("#" + ML_ID + "+table");
-            mbmp.setTable(table);
-            modLocation = mbmp.parse();
+            if (table != null) {
+                mbmp.setTable(table);
+                modLocation = mbmp.parse();
+            } else {
+               LOG.warn("\"Mod Drops by Mod\" table is not found.");
+            }
             updateProgress(75, PROGRESS_MAX);
 
             LOG.info("Generate \"ModDropByMod\" files.");
@@ -170,26 +196,40 @@ public class ParseAndPrintTask extends Task<Integer> {
             idw.setBoundaryKey(mbmp.getBoundaryKey());
             idw.setJsonFile(MOD_BY_MOD_JSON);
             idw.setXlsxFile(MOD_BY_MOD_XLSX);
-            idw.writeJsonFile(modLocation);
-            idw.writeXlsxFile(modLocation);
+            if (modLocation != null) {
+                idw.writeJsonFile(modLocation);
+                idw.writeXlsxFile(modLocation);
+            }
             updateProgress(80, PROGRESS_MAX);
 
             LOG.info("Parse \"Mod Drops by Enemy\" table.");
             table = page.querySelector("#" + EMT_ID + "+table");
-            ep.setTable(table);
-            ep.parse();
+            if (table != null) {
+                ep.setTable(table);
+                ep.parse();
+            } else {
+               LOG.warn("\"Mod Drops by Enemy\" table is not found.");
+            }
             updateProgress(85, PROGRESS_MAX);
 
             LOG.info("Parse \"Blueprint Drops by Enemy\" table.");
             table = page.querySelector("#" + EBT_ID + "+table");
-            ep.setTable(table);
-            ep.parse();
+            if (table != null) {
+                ep.setTable(table);
+                ep.parse();
+            } else {
+               LOG.warn("\"Blueprint Drops by Enemy\" table is not found.");
+            }
             updateProgress(90, PROGRESS_MAX);
 
             LOG.info("Parse \"Miscellanous Enemy Drops\" table.");
             table = page.querySelector("#" + MI_ID + "+table");
-            ep.setTable(table);
-            enemyDropTables = ep.parse();
+            if (table != null) {
+                ep.setTable(table);
+                enemyDropTables = ep.parse();
+            } else {
+               LOG.warn("\"Miscellanous Enemy Drops\" table is not found.");
+            }
             updateProgress(95, PROGRESS_MAX);
 
             LOG.info("Generate \"EnemyDrop\" files.");
@@ -202,8 +242,10 @@ public class ParseAndPrintTask extends Task<Integer> {
             idw.setSubTitle3("itemChance");
             idw.setJsonFile(MOD_BY_ENEMY_JSON);
             idw.setXlsxFile(MOD_BY_ENEMY_XLSX);
-            idw.writeJsonFile(enemyDropTables);
-            idw.writeXlsxFile(enemyDropTables);
+            if (enemyDropTables != null) {
+                idw.writeJsonFile(enemyDropTables);
+                idw.writeXlsxFile(enemyDropTables);
+            }
             updateProgress(100, PROGRESS_MAX);
 
             LOG.info("Done.");
