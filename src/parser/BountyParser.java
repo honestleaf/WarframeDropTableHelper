@@ -34,11 +34,17 @@ import java.util.ArrayList;
  */
 public class BountyParser extends GenericParser<HtmlTable, ArrayList<String[]>> {
 
+    private String planet = "Earth";
+    
+    public void setPlanet(String planet) {
+        this.planet = planet;
+    }
+
     @Override
     public ArrayList<String[]> parse() {
         ArrayList<String[]> list = new ArrayList<>();
         StringParser sp = new StringParser();
-        String rotation = null, chance, buffer, planet = "Earth", node, mtype = "Bounty", reward = null, bountyTier = null, bountyStage = null, temp;
+        String rotation = null, chance, buffer, planet = this.planet, node, mtype = "Bounty", reward = null, bountyTier = null, bountyStage = null, temp;
         for (final HtmlTableRow row : this.table.getRows()) {
             INNER:
             for (final HtmlTableCell cell : row.getCells()) {

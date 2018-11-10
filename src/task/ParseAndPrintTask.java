@@ -58,6 +58,7 @@ public class ParseAndPrintTask extends Task<Integer> {
     private final static String DATA_URL = "https://n8k6e2y6.ssl.hwcdn.net/repos/hnfvc0o3jnfvc873njb03enrf56.html";
     private final static String MR_ID = "missionRewards";
     private final static String BOUNTY_ID = "cetusRewards";
+    private final static String OB_BOUNTY_ID = "solarisRewards";
     private final static String TR_ID = "transientRewards";
     private final static String ML_ID = "modLocations";
     private final static String EMT_ID = "enemyModTables";
@@ -119,6 +120,17 @@ public class ParseAndPrintTask extends Task<Integer> {
                 missionDrop.addAll(bp.parse());
             } else {
                LOG.warn("\"Cetus Bounty Rewards\" table is not found.");
+            }
+            updateProgress(53, PROGRESS_MAX);
+            
+            LOG.info("Parse \"Orb Vallis Bounty Rewards\" table.");
+            table = page.querySelector("#" + OB_BOUNTY_ID + "+table");
+            if (table != null) {
+                bp.setPlanet("Venus");
+                bp.setTable(table);
+                missionDrop.addAll(bp.parse());
+            } else {
+               LOG.warn("\"Orb Vallis Bounty Rewards\" table is not found.");
             }
             updateProgress(55, PROGRESS_MAX);
 
