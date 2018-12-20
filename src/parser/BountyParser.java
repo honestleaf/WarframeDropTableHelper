@@ -61,6 +61,11 @@ public class BountyParser extends GenericParser<HtmlTable, ArrayList<String[]>> 
                             rotation = temp;
                             break INNER;
                         }
+                        temp = sp.parseBountyCompletion(buffer);
+                        if (temp != null) {
+                            rotation = temp;
+                            break INNER;
+                        }
                         break;
                     case 2:
                         bountyStage = sp.parseBountyStage(buffer);

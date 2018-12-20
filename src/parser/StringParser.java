@@ -37,8 +37,9 @@ public class StringParser {
     private final Pattern nodePattern = Pattern.compile("(.+?)/(.+?) \\((.+?)\\) *(.*)");
     private final Pattern rotationPattern = Pattern.compile("Rotation (A|B|C)");
     private final Pattern chancePattern = Pattern.compile("([0-9\\.]+)%");
-    private final Pattern bountyTierPattern = Pattern.compile("Level .+? Bounty");
+    private final Pattern bountyTierPattern = Pattern.compile("Level .+");
     private final Pattern bountyStagePattern = Pattern.compile("(Final |)Stage.*");
+    private final Pattern bountyCompletionPattern = Pattern.compile("(.+?) Completion(s|)");
 
     /**
      *
@@ -99,6 +100,29 @@ public class StringParser {
         if (m.find()) {
             bountyStage = m.group(0);
             return bountyStage;
+        } else {
+            return null;
+        }
+    }
+    
+    public String parseBountyCompletion(String s) {
+        Matcher m = bountyCompletionPattern.matcher(s);
+        String rotation;
+        if (m.find()) {
+            switch (m.group(1)) {
+                case "Bounty":
+                    rotation = "All";
+                    break;
+                case "First":
+                    rotation = "A";
+                    break;
+                case "Subsequent":
+                    rotation = "B";
+                    break;
+                default:
+                    rotation = null;
+            }
+            return rotation;
         } else {
             return null;
         }
