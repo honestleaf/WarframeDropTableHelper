@@ -55,6 +55,8 @@ public class EnemyParser extends GenericParser<HtmlTable, HashMap<String, ArrayL
     public HashMap<String, ArrayList<Object[]>> parse() {
         if (this.dropTable == null) {
             this.dropTable = new HashMap<>();
+            this.listSizeMax = 1;
+            this.boundaryKey = null;
         }
         ArrayList<Object[]> list;
         StringParser sp = new StringParser();
@@ -92,6 +94,9 @@ public class EnemyParser extends GenericParser<HtmlTable, HashMap<String, ArrayL
                                 }
                                 if (list.size() > this.listSizeMax) {
                                     this.listSizeMax = list.size();
+                                    this.boundaryKey = enemy;
+                                }
+                                if (this.boundaryKey == null) {
                                     this.boundaryKey = enemy;
                                 }
                             }

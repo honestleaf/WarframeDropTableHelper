@@ -60,12 +60,13 @@ public class ParseAndPrintTask extends Task<Integer> {
     private final static String BOUNTY_ID = "cetusRewards";
     private final static String OB_BOUNTY_ID = "solarisRewards";
     private final static String TR_ID = "transientRewards";
-    private final static String ML_ID = "modLocations";
-    private final static String EMT_ID = "enemyModTables";
+    private final static String ML_ID = "modByDrop";
+    private final static String EMT_ID = "modByAvatar";
     private final static String SR_ID = "sortieRewards";
     private final static String KR_ID = "keyRewards";
-    private final static String MI_ID = "miscItems";
-    private final static String EBT_ID = "enemyBlueprintTables";
+    private final static String MI_ID = "resourceByAvatar";
+    private final static String EBT_ID = "blueprintByAvatar";
+    private final static String ST_ID = "sigilByAvatar";
     private final static String ADDITIONAL_DATA_FILE = "AdditionalData.xlsx";
 
     private final static String MISSION_DROP_JSON = "MissionDrop.json";
@@ -74,8 +75,17 @@ public class ParseAndPrintTask extends Task<Integer> {
     private final static String MOD_BY_MOD_JSON = "ModDropByMod.json";
     private final static String MOD_BY_MOD_XLSX = "ModDropByMod.xlsx";
 
-    private final static String MOD_BY_ENEMY_JSON = "EnemyDrop.json";
-    private final static String MOD_BY_ENEMY_XLSX = "EnemyDrop.xlsx";
+    private final static String MOD_BY_ENEMY_JSON = "EnemyModDrop.json";
+    private final static String MOD_BY_ENEMY_XLSX = "EnemyModDrop.xlsx";
+    
+    private final static String PART_BY_ENEMY_JSON = "EnemyPartDrop.json";
+    private final static String PART_BY_ENEMY_XLSX = "EnemyPartDrop.xlsx";
+    
+    private final static String RESOURCE_BY_ENEMY_JSON = "EnemyResourceDrop.json";
+    private final static String RESOURCE_BY_ENEMY_XLSX = "EnemyResourceDrop.xlsx";
+    
+    private final static String SIGIL_BY_ENEMY_JSON = "EnemySigilDrop.json";
+    private final static String SIGIL_BY_ENEMY_XLSX = "EnemySigilDrop.xlsx";
 
     @Override
     protected Integer call() throws Exception {
@@ -218,33 +228,12 @@ public class ParseAndPrintTask extends Task<Integer> {
             table = page.querySelector("#" + EMT_ID + "+table");
             if (table != null) {
                 ep.setTable(table);
-                ep.parse();
+                enemyDropTables = ep.parse();
             } else {
                LOG.warn("\"Mod Drops by Enemy\" table is not found.");
             }
-            updateProgress(85, PROGRESS_MAX);
-
-            LOG.info("Parse \"Blueprint Drops by Enemy\" table.");
-            table = page.querySelector("#" + EBT_ID + "+table");
-            if (table != null) {
-                ep.setTable(table);
-                ep.parse();
-            } else {
-               LOG.warn("\"Blueprint Drops by Enemy\" table is not found.");
-            }
-            updateProgress(90, PROGRESS_MAX);
-
-            LOG.info("Parse \"Miscellanous Enemy Drops\" table.");
-            table = page.querySelector("#" + MI_ID + "+table");
-            if (table != null) {
-                ep.setTable(table);
-                enemyDropTables = ep.parse();
-            } else {
-               LOG.warn("\"Miscellanous Enemy Drops\" table is not found.");
-            }
-            updateProgress(95, PROGRESS_MAX);
-
-            LOG.info("Generate \"EnemyDrop\" files.");
+            
+            LOG.info("Generate \"EnemyModDrop\" files.");
             idw.setListSizeMax(ep.getListSizeMax());
             idw.setBoundaryKey(ep.getBoundaryKey());
             idw.setKeyTitle("enemyName");
@@ -258,10 +247,76 @@ public class ParseAndPrintTask extends Task<Integer> {
                 idw.writeJsonFile(enemyDropTables);
                 idw.writeXlsxFile(enemyDropTables);
             }
+            updateProgress(85, PROGRESS_MAX);
+
+            LOG.info("Parse \"Blueprint/Part Drops by Enemy\" table.");
+            table = page.querySelector("#" + EBT_ID + "+table");
+            if (table != null) {
+                ep.setDropTable(null);
+                ep.setTable(table);
+                enemyDropTables = ep.parse();
+            } else {
+               LOG.warn("\"Blueprint/Part Drops by Enemy\" table is not found.");
+            }
+            
+            LOG.info("Generate \"EnemyPartDrop\" files.");
+            idw.setListSizeMax(ep.getListSizeMax());
+            idw.setBoundaryKey(ep.getBoundaryKey());
+            idw.setJsonFile(PART_BY_ENEMY_JSON);
+            idw.setXlsxFile(PART_BY_ENEMY_XLSX);
+            if (enemyDropTables != null) {
+                idw.writeJsonFile(enemyDropTables);
+                idw.writeXlsxFile(enemyDropTables);
+            }
+            
+            updateProgress(90, PROGRESS_MAX);
+
+            LOG.info("Parse \"Resource Drops by Enemy\" table.");
+            table = page.querySelector("#" + MI_ID + "+table");
+            if (table != null) {
+                ep.setDropTable(null);
+                ep.setTable(table);
+                enemyDropTables = ep.parse();
+            } else {
+               LOG.warn("\"Resource Drops by Enemy\" table is not found.");
+            }
+            
+            LOG.info("Generate \"EnemyResourceDrop\" files.");
+            idw.setListSizeMax(ep.getListSizeMax());
+            idw.setBoundaryKey(ep.getBoundaryKey());
+            idw.setJsonFile(RESOURCE_BY_ENEMY_JSON);
+            idw.setXlsxFile(RESOURCE_BY_ENEMY_XLSX);
+            if (enemyDropTables != null) {
+                idw.writeJsonFile(enemyDropTables);
+                idw.writeXlsxFile(enemyDropTables);
+            }
+            
+            updateProgress(95, PROGRESS_MAX);
+
+            LOG.info("Parse \"Sigil Drops by Enemy\" table.");
+            table = page.querySelector("#" + ST_ID + "+table");
+            if (table != null) {
+                ep.setDropTable(null);
+                ep.setTable(table);
+                enemyDropTables = ep.parse();
+            } else {
+               LOG.warn("\"Sigil Drops by Enemy\" table is not found.");
+            }
+            
+            LOG.info("Generate \"EnemySigilDrop\" files.");
+            idw.setListSizeMax(ep.getListSizeMax());
+            idw.setBoundaryKey(ep.getBoundaryKey());
+            idw.setJsonFile(SIGIL_BY_ENEMY_JSON);
+            idw.setXlsxFile(SIGIL_BY_ENEMY_XLSX);
+            if (enemyDropTables != null) {
+                idw.writeJsonFile(enemyDropTables);
+                idw.writeXlsxFile(enemyDropTables);
+            }
+            
             updateProgress(100, PROGRESS_MAX);
 
             LOG.info("Done.");
-        } catch (IOException | FailingHttpStatusCodeException ex) {
+        } catch (Exception ex) {
             Logger.getLogger(ParseAndPrintTask.class.getName()).error(null, ex);
         }
         return 0;
