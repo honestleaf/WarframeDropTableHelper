@@ -24,6 +24,7 @@
 package tablewriter;
 
 import java.io.File;
+import java.util.Map;
 
 /**
  *
@@ -41,6 +42,13 @@ public abstract class GenericDropWriter<T> {
     public GenericDropWriter(String jsonFilePath, String xlsxFilePath) {
         this.jsonFile = new File(jsonFilePath);
         this.xlsxFile = new File(xlsxFilePath);
+    }
+
+    protected Map<String, Object> setupJsonField(Map<String, Object> template, String name) {
+        template.put("name", name.replaceAll("[\\[\\]\\.]", ""));
+        Map<String, Object> title = (Map<String, Object>) template.get("title");
+        title.put("en", name);
+        return template;
     }
 
     public void setJsonFile(String jsonFilePath) {
