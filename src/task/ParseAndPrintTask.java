@@ -67,6 +67,7 @@ public class ParseAndPrintTask extends Task<Integer> {
     private final static String MI_ID = "resourceByAvatar";
     private final static String EBT_ID = "blueprintByAvatar";
     private final static String ST_ID = "sigilByAvatar";
+    private final static String AI_ID = "additionalItemByAvatar";
     private final static String ADDITIONAL_DATA_FILE = "AdditionalData.xlsx";
 
     private final static String MISSION_DROP_JSON = "MissionDrop.json";
@@ -86,7 +87,7 @@ public class ParseAndPrintTask extends Task<Integer> {
     
     private final static String SIGIL_BY_ENEMY_JSON = "EnemySigilDrop.json";
     private final static String SIGIL_BY_ENEMY_XLSX = "EnemySigilDrop.xlsx";
-
+    
     @Override
     protected Integer call() throws Exception {
 
@@ -257,6 +258,15 @@ public class ParseAndPrintTask extends Task<Integer> {
                 enemyDropTables = ep.parse();
             } else {
                LOG.warn("\"Blueprint/Part Drops by Enemy\" table is not found.");
+            }
+            
+            LOG.info("Parse \"Additional Item Drops by Enemy\" table.");
+            table = page.querySelector("#" + AI_ID + "+table");
+            if (table != null) {
+                ep.setTable(table);
+                enemyDropTables = ep.parse();
+            } else {
+               LOG.warn("\"Additional Item Drops by Enemy\" table is not found.");
             }
             
             LOG.info("Generate \"EnemyPartDrop\" files.");
